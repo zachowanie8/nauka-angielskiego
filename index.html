@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nauka słówek</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <h1>🇬🇧 Nauka słówek</h1>
+
+    <div class="card">
+      <p id="word">Kliknij „Losuj”</p>
+      <p id="translation" class="hidden"></p>
+    </div>
+
+    <button onclick="drawWord()">Losuj</button>
+    <button onclick="showTranslation()">Pokaż tłumaczenie</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
