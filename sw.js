@@ -1,6 +1,6 @@
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open("slownik-cache").then(cache => {
+    caches.open("slownik-cachev2").then(cache => {
       return cache.addAll([
         "/",
         "/index.html",
