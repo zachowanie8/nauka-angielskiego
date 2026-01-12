@@ -1,27 +1,109 @@
-const words = [
-  { en: "Being gay is easy.", pl: "Bycie gejem jest proste." },
-  { en: "Straight guys fear gay men the way mirrors fear honesty.", pl: "Hetero boją się gejów tak jak lustra boją się prawdy." },
-  { en: "I’m gay, horny, and full of bad ideas.", pl: "Jestem gejem, napalony i pełen złych pomysłów." },
-  { en: "I don’t need love, I need dick and peace.", pl: "Nie potrzebuję miłości, potrzebuję penisa i spokoju." },
-  { en: "My ass has better opinions than my brain.", pl: "Moja dupa ma lepsze opinie niż mój mózg." }
-];
+// ===============================
+// DANE + ZAPIS POSTĘPÓW
+// ===============================
 
+const STORAGE_KEY = "english-quiz-progress";
+
+function loadWords() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) return JSON.parse(saved);
+  return DEFAULT_WORDS;
+}
+
+function saveWords() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
+}
+
+let words = loadWords();
 let currentWord = null;
+let score = 0;
+let total = 0;
 
-function drawWord() {
-  currentWord = words[Math.floor(Math.random() * words.length)];
-  document.getElementById("word").textContent = currentWord.en;
-  document.getElementById("translation").textContent = currentWord.pl;
-  document.getElementById("translation").classList.add("hidden");
+// ===============================
+// LOSOWANIE (SŁABE SŁOWA CZĘŚCIEJ)
+// ===============================
+
+function getNextWord() {
+  const pool = [];
+
+  words.forEach(w => {
+    const weight = Math.max(1, 5 - w.level);
+    for (let i = 0; i < weight; i++) {
+      pool.push(w);
+    }
+  });
+
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function showTranslation() {
-  if (currentWord) {
-    document.getElementById("translation").classList.remove("hidden");
+// ===============================
+// QUIZ
+// ===============================
+
+function showNextQuestion() {
+  currentWord = getNextWord();
+
+  document.getElementById("question").innerText =
+    `Przetłumacz: ${currentWord.en}`;
+
+  document.getElementById("answer").value = "";
+  document.getElementById("result").innerText = "";
+}
+
+function checkAnswer() {
+  const userAnswer = document
+    .getElementById("answer")
+    .value.trim()
+    .toLowerCase();
+
+  if (!userAnswer) return;
+
+  total++;
+
+  if (userAnswer === currentWord.pl.toLowerCase()) {
+    currentWord.correct++;
+    currentWord.level = Math.min(5, currentWord.level + 1);
+    score++;
+    document.getElementById("result").innerText = "✅ Dobrze!";
+  } else {
+    currentWord.wrong++;
+    currentWord.level = Math.max(0, currentWord.level - 1);
+    document.getElementById("result").innerText =
+      `❌ Źle! Poprawnie: ${currentWord.pl}`;
   }
+
+  saveWords();
+  updateStats();
+
+  setTimeout(showNextQuestion, 1000);
 }
 
-// PWA
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+// ===============================
+// STATYSTYKI
+// ===============================
+
+function updateStats() {
+  const known = words.filter(w => w.level >= 3).length;
+
+  document.getElementById("stats").innerText =
+    `Wynik: ${score}/${total} | Opanowane: ${known}/${words.length}`;
 }
+
+// ===============================
+// RESET
+// ===============================
+
+function resetProgress() {
+  if (!confirm("Na pewno chcesz zresetować postępy?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ===============================
+// START
+// ===============================
+
+document.addEventListener("DOMContentLoaded", () => {
+  showNextQuestion();
+  updateStats();
+});
