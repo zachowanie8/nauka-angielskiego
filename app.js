@@ -1,18 +1,36 @@
 // ===============================
-// DANE + ZAPIS POSTĘPÓW
+// PODSTAWOWE SŁÓWKA (NA START)
+// ===============================
+
+const DEFAULT_WORDS = [
+  { en: "apple", pl: "jabłko", level: 0, correct: 0, wrong: 0 },
+  { en: "house", pl: "dom", level: 0, correct: 0, wrong: 0 },
+  { en: "book", pl: "książka", level: 0, correct: 0, wrong: 0 },
+  { en: "dog", pl: "pies", level: 0, correct: 0, wrong: 0 },
+  { en: "cat", pl: "kot", level: 0, correct: 0, wrong: 0 }
+];
+
+// ===============================
+// LOCAL STORAGE
 // ===============================
 
 const STORAGE_KEY = "english-quiz-progress";
 
 function loadWords() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) return JSON.parse(saved);
-  return DEFAULT_WORDS;
+  if (saved) {
+    return JSON.parse(saved);
+  }
+  return [...DEFAULT_WORDS];
 }
 
 function saveWords() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
 }
+
+// ===============================
+// ZMIENNE
+// ===============================
 
 let words = loadWords();
 let currentWord = null;
@@ -20,16 +38,16 @@ let score = 0;
 let total = 0;
 
 // ===============================
-// LOSOWANIE (SŁABE SŁOWA CZĘŚCIEJ)
+// LOSOWANIE SŁÓWKA (SŁABE CZĘŚCIEJ)
 // ===============================
 
 function getNextWord() {
   const pool = [];
 
-  words.forEach(w => {
-    const weight = Math.max(1, 5 - w.level);
+  words.forEach(word => {
+    const weight = Math.max(1, 5 - word.level);
     for (let i = 0; i < weight; i++) {
-      pool.push(w);
+      pool.push(word);
     }
   });
 
@@ -43,24 +61,34 @@ function getNextWord() {
 function showNextQuestion() {
   currentWord = getNextWord();
 
+  if (!currentWord) {
+    document.getElementById("question").innerText =
+      "Brak słówek do nauki";
+    return;
+  }
+
   document.getElementById("question").innerText =
-    `Przetłumacz: ${currentWord.en}`;
+    "Przetłumacz: " + currentWord.en;
 
   document.getElementById("answer").value = "";
+  document.getElementById("answer").focus();
   document.getElementById("result").innerText = "";
 }
 
 function checkAnswer() {
-  const userAnswer = document
+  if (!currentWord) return;
+
+  const input = document
     .getElementById("answer")
-    .value.trim()
+    .value
+    .trim()
     .toLowerCase();
 
-  if (!userAnswer) return;
+  if (input === "") return;
 
   total++;
 
-  if (userAnswer === currentWord.pl.toLowerCase()) {
+  if (input === currentWord.pl.toLowerCase()) {
     currentWord.correct++;
     currentWord.level = Math.min(5, currentWord.level + 1);
     score++;
@@ -69,7 +97,7 @@ function checkAnswer() {
     currentWord.wrong++;
     currentWord.level = Math.max(0, currentWord.level - 1);
     document.getElementById("result").innerText =
-      `❌ Źle! Poprawnie: ${currentWord.pl}`;
+      "❌ Źle! Poprawnie: " + currentWord.pl;
   }
 
   saveWords();
@@ -94,21 +122,23 @@ function updateStats() {
 // ===============================
 
 function resetProgress() {
-  if (!confirm("Na pewno chcesz zresetować postępy?")) return;
+  if (!confirm("Czy na pewno zresetować postępy?")) return;
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
 }
 
-const DEFAULT_WORDS = [
-  { en: "apple", pl: "jabłko", level: 0, correct: 0, wrong: 0 }
-];
-
-
 // ===============================
-// START
+// START APLIKACJI
 // ===============================
 
 document.addEventListener("DOMContentLoaded", () => {
-  showNextQuestion();
   updateStats();
+  showNextQuestion();
+});
+
+// ENTER = sprawdź odpowiedź
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    checkAnswer();
+  }
 });
