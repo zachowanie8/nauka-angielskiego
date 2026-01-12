@@ -99,6 +99,11 @@ function resetProgress() {
   location.reload();
 }
 
+const DEFAULT_WORDS = [
+  { en: "apple", pl: "jabłko", level: 0, correct: 0, wrong: 0 }
+];
+
+
 // ===============================
 // START
 // ===============================
