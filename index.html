@@ -2,48 +2,14 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nauka słówek – quiz</title>
-
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
-
-  <!-- kolor paska w PWA -->
-  <meta name="theme-color" content="#2c3e50">
+  <title>Test</title>
 </head>
 <body>
-  <div class="app">
-    <h1>🇬🇧 Nauka słówek</h1>
-    <p class="subtitle">Tryb quizu</p>
 
-    <!-- PYTANIE -->
-    <h2 id="question">Ładowanie pytania...</h2>
+<h2 id="question">Ładowanie pytania...</h2>
+<input id="answer">
+<button onclick="checkAnswer()">Sprawdź</button>
 
-    <!-- ODPOWIEDŹ -->
-    <input
-      id="answer"
-      type="text"
-      placeholder="Wpisz tłumaczenie po polsku"
-      autocomplete="off"
-    />
-
-    <button class="primary" onclick="checkAnswer()">
-      Sprawdź
-    </button>
-
-    <!-- WYNIK -->
-    <p id="result" class="result"></p>
-
-    <!-- STATYSTYKI -->
-    <p id="stats" class="stats"></p>
-
-    <!-- AKCJE -->
-    <button class="secondary" onclick="resetProgress()">
-      Reset postępów
-    </button>
-  </div>
-
-  <script src="app.js" defer></script>
-
+<script src="app.js" defer></script>
 </body>
 </html>
