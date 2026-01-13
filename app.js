@@ -1,5 +1,5 @@
 // ===============================
-// SŁÓWKA STARTOWE
+// SŁÓWKA
 // ===============================
 const DEFAULT_WORDS = [
   { en: "apple", pl: "jabłko", level: 0 },
@@ -13,48 +13,36 @@ const DEFAULT_WORDS = [
 // ===============================
 // STORAGE
 // ===============================
-const STORAGE_KEY = "english-quiz-data";
+const STORAGE_KEY = "english-quiz-abcd";
 
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) return JSON.parse(saved);
-
-  return {
-    words: DEFAULT_WORDS,
-    score: 0,
-    total: 0,
-    streak: 0
-  };
+  return saved
+    ? JSON.parse(saved)
+    : { words: DEFAULT_WORDS, score: 0, streak: 0 };
 }
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-// ===============================
-// ZMIENNE
-// ===============================
 let data = loadData();
 let currentWord = null;
 
 // ===============================
-// LOSOWANIE (SŁABE CZĘŚCIEJ)
+// LOSOWANIE
 // ===============================
 function getNextWord() {
   const pool = [];
-
-  data.words.forEach(word => {
-    const weight = Math.max(1, 6 - word.level);
-    for (let i = 0; i < weight; i++) {
-      pool.push(word);
-    }
+  data.words.forEach(w => {
+    const weight = Math.max(1, 6 - w.level);
+    for (let i = 0; i < weight; i++) pool.push(w);
   });
-
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // ===============================
-// QUIZ
+// QUIZ ABCD
 // ===============================
 function showNextQuestion() {
   currentWord = getNextWord();
@@ -62,44 +50,57 @@ function showNextQuestion() {
   document.getElementById("question").innerText =
     "Przetłumacz: " + currentWord.en;
 
-  document.getElementById("answer").value = "";
-  document.getElementById("answer").focus();
-  document.getElementById("result").innerText = "";
+  const answers = generateAnswers(currentWord);
+  const container = document.querySelector(".answers");
+  container.innerHTML = "";
+
+  answers.forEach(ans => {
+    const btn = document.createElement("button");
+    btn.innerText = ans;
+    btn.onclick = () => checkAnswer(ans, btn);
+    container.appendChild(btn);
+  });
+
+  updateStats();
 }
 
-function checkAnswer() {
-  const input = document
-    .getElementById("answer")
-    .value
-    .trim()
-    .toLowerCase();
+function generateAnswers(correctWord) {
+  const options = [correctWord.pl];
 
-  if (!input) return;
+  while (options.length < 4) {
+    const random =
+      data.words[Math.floor(Math.random() * data.words.length)].pl;
+    if (!options.includes(random)) options.push(random);
+  }
 
-  data.total++;
+  return options.sort(() => Math.random() - 0.5);
+}
 
-  if (input === currentWord.pl.toLowerCase()) {
-    // ✅ DOBRZE
+function checkAnswer(answer, button) {
+  const buttons = document.querySelectorAll(".answers button");
+
+  buttons.forEach(b => (b.disabled = true));
+
+  if (answer === currentWord.pl) {
+    button.classList.add("correct");
     data.score += 10;
     data.streak++;
     currentWord.level = Math.min(5, currentWord.level + 1);
-
-    document.getElementById("result").innerText =
-      "✅ Dobrze! +" + 10;
   } else {
-    // ❌ ŹLE
-    data.score = Math.max(0, data.score - 5);
+    button.classList.add("wrong");
     data.streak = 0;
+    data.score = Math.max(0, data.score - 5);
     currentWord.level = Math.max(0, currentWord.level - 1);
 
-    document.getElementById("result").innerText =
-      "❌ Źle! Poprawnie: " + currentWord.pl;
+    buttons.forEach(b => {
+      if (b.innerText === currentWord.pl) {
+        b.classList.add("correct");
+      }
+    });
   }
 
   saveData();
-  updateStats();
-
-  setTimeout(showNextQuestion, 900);
+  setTimeout(showNextQuestion, 1200);
 }
 
 // ===============================
@@ -107,18 +108,15 @@ function checkAnswer() {
 // ===============================
 function updateStats() {
   const mastered = data.words.filter(w => w.level >= 3).length;
-
   document.getElementById("stats").innerText =
-    `🏆 Punkty: ${data.score}
-     | 🔥 Seria: ${data.streak}
-     | 📊 Postęp: ${mastered}/${data.words.length}`;
+    `🏆 ${data.score} pkt | 🔥 ${data.streak} | 📘 ${mastered}/${data.words.length}`;
 }
 
 // ===============================
 // RESET
 // ===============================
 function resetProgress() {
-  if (!confirm("Zresetować cały postęp?")) return;
+  if (!confirm("Zresetować postęp?")) return;
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
 }
@@ -126,14 +124,4 @@ function resetProgress() {
 // ===============================
 // START
 // ===============================
-document.addEventListener("DOMContentLoaded", () => {
-  updateStats();
-  showNextQuestion();
-});
-
-// ENTER = sprawdź
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    checkAnswer();
-  }
-});
+document.addEventListener("DOMContentLoaded", showNextQuestion);
