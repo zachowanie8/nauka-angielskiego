@@ -1,25 +1,29 @@
 // ===============================
-// SŁÓWKA
-// ===============================
-const DEFAULT_WORDS = [
-  { en: "apple", pl: "jabłko", level: 0 },
-  { en: "house", pl: "dom", level: 0 },
-  { en: "book", pl: "książka", level: 0 },
-  { en: "dog", pl: "pies", level: 0 },
-  { en: "cat", pl: "kot", level: 0 },
-  { en: "car", pl: "samochód", level: 0 }
-];
-
-// ===============================
-// STORAGE
+// KONFIGURACJA
 // ===============================
 const STORAGE_KEY = "english-quiz-abcd";
+const ACTIVE_SETS = ["conversation", "car"]; // ← tu wybierasz kategorie
+
+// ===============================
+// ŁADOWANIE DANYCH
+// ===============================
+function buildWordList() {
+  let list = [];
+  ACTIVE_SETS.forEach(set => {
+    list = list.concat(WORD_SETS[set]);
+  });
+  return list;
+}
 
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  return saved
-    ? JSON.parse(saved)
-    : { words: DEFAULT_WORDS, score: 0, streak: 0 };
+  if (saved) return JSON.parse(saved);
+
+  return {
+    words: buildWordList(),
+    score: 0,
+    streak: 0
+  };
 }
 
 function saveData() {
@@ -30,7 +34,7 @@ let data = loadData();
 let currentWord = null;
 
 // ===============================
-// LOSOWANIE
+// LOSOWANIE (SŁABE WRACAJĄ)
 // ===============================
 function getNextWord() {
   const pool = [];
@@ -78,7 +82,6 @@ function generateAnswers(correctWord) {
 
 function checkAnswer(answer, button) {
   const buttons = document.querySelectorAll(".answers button");
-
   buttons.forEach(b => (b.disabled = true));
 
   if (answer === currentWord.pl) {
@@ -88,14 +91,12 @@ function checkAnswer(answer, button) {
     currentWord.level = Math.min(5, currentWord.level + 1);
   } else {
     button.classList.add("wrong");
-    data.streak = 0;
     data.score = Math.max(0, data.score - 5);
+    data.streak = 0;
     currentWord.level = Math.max(0, currentWord.level - 1);
 
     buttons.forEach(b => {
-      if (b.innerText === currentWord.pl) {
-        b.classList.add("correct");
-      }
+      if (b.innerText === currentWord.pl) b.classList.add("correct");
     });
   }
 
