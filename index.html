@@ -2,25 +2,39 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Nauka słówek – Quiz</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA (opcjonalnie, jeśli masz) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111827">
 </head>
 <body>
 
-<h2 id="question"></h2>
-  <div class="answers"></div>
+  <div class="app">
+    <h1>🇬🇧 Nauka słówek</h1>
+    <p class="subtitle">Quiz ABCD</p>
 
+    <!-- PYTANIE -->
+    <h2 id="question"></h2>
 
-<input id="answer" placeholder="Wpisz tłumaczenie" />
-<button onclick="checkAnswer()">Sprawdź</button>
+    <!-- ODPOWIEDZI ABCD -->
+    <div class="answers"></div>
 
-<p id="result"></p>
-<p id="stats"></p>
+    <!-- STATYSTYKI -->
+    <p id="stats"></p>
 
-<button onclick="resetProgress()">Reset</button>
+    <!-- RESET -->
+    <button class="secondary" onclick="resetProgress()">
+      Reset postępów
+    </button>
+  </div>
 
-<script src="app.js" defer></script>
+  <!-- JS -->
+  <script src="app.js" defer></script>
 </body>
 </html>
-
-
-
