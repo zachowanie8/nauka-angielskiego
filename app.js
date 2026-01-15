@@ -228,5 +228,7 @@ function setupLiveSwitching() {
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
   data = loadData();
+  setupLiveSwitching();
   showNextQuestion();
 });
+
