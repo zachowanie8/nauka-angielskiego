@@ -90,3 +90,24 @@ h1 {
 .secondary:hover {
   background: #1f2933;
 }
+
+.panel {
+  background: #1f2933;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.typing input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 8px;
+}
+
