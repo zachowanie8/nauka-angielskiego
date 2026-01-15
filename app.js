@@ -1,18 +1,23 @@
-// ===============================
-// KONFIGURACJA
-// ===============================
-const STORAGE_KEY = "english-quiz-abcd";
-const ACTIVE_SETS = ["conversation", "car"]; // ← tu wybierasz kategorie
+const STORAGE_KEY = "english-quiz-advanced";
 
 // ===============================
-// ŁADOWANIE DANYCH
+// STAN APLIKACJI
 // ===============================
-function buildWordList() {
-  let list = [];
-  ACTIVE_SETS.forEach(set => {
-    list = list.concat(WORD_SETS[set]);
-  });
-  return list;
+let data = {
+  words: [],
+  score: 0,
+  streak: 0
+};
+
+let currentWord = null;
+let mode = "abcd";
+let activeCategories = ["conversation", "car"];
+
+// ===============================
+// POMOCNICZE
+// ===============================
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 function loadData() {
@@ -26,16 +31,16 @@ function loadData() {
   };
 }
 
-function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function buildWordList() {
+  let list = [];
+  activeCategories.forEach(cat => {
+    list = list.concat(
+      WORD_SETS[cat].map(w => ({ ...w }))
+    );
+  });
+  return list;
 }
 
-let data = loadData();
-let currentWord = null;
-
-// ===============================
-// LOSOWANIE (SŁABE WRACAJĄ)
-// ===============================
 function getNextWord() {
   const pool = [];
   data.words.forEach(w => {
@@ -46,62 +51,140 @@ function getNextWord() {
 }
 
 // ===============================
-// QUIZ ABCD
+// UI – ZMIANY TRYBU / KATEGORII
+// ===============================
+function readSettings() {
+  mode = document.querySelector('input[name="mode"]:checked').value;
+
+  activeCategories = Array.from(
+    document.querySelectorAll('input[type="checkbox"]:checked')
+  ).map(cb => cb.value);
+
+  if (activeCategories.length === 0) {
+    alert("Wybierz przynajmniej jedną kategorię!");
+    return false;
+  }
+
+  data.words = buildWordList();
+  saveData();
+  return true;
+}
+
+// ===============================
+// QUIZ
 // ===============================
 function showNextQuestion() {
+  if (!readSettings()) return;
+
   currentWord = getNextWord();
 
   document.getElementById("question").innerText =
-    "Przetłumacz: " + currentWord.en;
+    mode === "abcd"
+      ? "Przetłumacz: " + currentWord.en
+      : "Jak jest po angielsku: " + currentWord.pl;
 
-  const answers = generateAnswers(currentWord);
-  const container = document.querySelector(".answers");
-  container.innerHTML = "";
+  document.querySelector(".answers").innerHTML = "";
+  document.querySelector(".typing").classList.add("hidden");
 
-  answers.forEach(ans => {
-    const btn = document.createElement("button");
-    btn.innerText = ans;
-    btn.onclick = () => checkAnswer(ans, btn);
-    container.appendChild(btn);
-  });
+  if (mode === "abcd") {
+    showABCD();
+  } else {
+    showTyping();
+  }
 
   updateStats();
 }
 
-function generateAnswers(correctWord) {
-  const options = [correctWord.pl];
+// ===============================
+// TRYB ABCD
+// ===============================
+function showABCD() {
+  const answers = generateAnswers(currentWord);
+  const container = document.querySelector(".answers");
 
+  answers.forEach(ans => {
+    const btn = document.createElement("button");
+    btn.innerText = ans;
+    btn.onclick = () => checkABCD(ans, btn);
+    container.appendChild(btn);
+  });
+}
+
+function generateAnswers(word) {
+  const options = [word.pl];
   while (options.length < 4) {
-    const random =
-      data.words[Math.floor(Math.random() * data.words.length)].pl;
-    if (!options.includes(random)) options.push(random);
+    const r = data.words[Math.floor(Math.random() * data.words.length)].pl;
+    if (!options.includes(r)) options.push(r);
   }
-
   return options.sort(() => Math.random() - 0.5);
 }
 
-function checkAnswer(answer, button) {
-  const buttons = document.querySelectorAll(".answers button");
-  buttons.forEach(b => (b.disabled = true));
+function checkABCD(answer, button) {
+  document.querySelectorAll(".answers button")
+    .forEach(b => (b.disabled = true));
 
   if (answer === currentWord.pl) {
-    button.classList.add("correct");
-    data.score += 10;
-    data.streak++;
-    currentWord.level = Math.min(5, currentWord.level + 1);
+    success(button);
   } else {
-    button.classList.add("wrong");
-    data.score = Math.max(0, data.score - 5);
-    data.streak = 0;
-    currentWord.level = Math.max(0, currentWord.level - 1);
+    fail(button, currentWord.pl);
+  }
 
-    buttons.forEach(b => {
-      if (b.innerText === currentWord.pl) b.classList.add("correct");
+  setTimeout(showNextQuestion, 1200);
+}
+
+// ===============================
+// TRYB WPISYWANIA (PL → EN)
+// ===============================
+function showTyping() {
+  const box = document.querySelector(".typing");
+  box.classList.remove("hidden");
+  document.getElementById("typingAnswer").value = "";
+  document.getElementById("typingResult").innerText = "";
+}
+
+function checkTyping() {
+  const input = document
+    .getElementById("typingAnswer")
+    .value.trim().toLowerCase();
+
+  if (!input) return;
+
+  if (input === currentWord.en.toLowerCase()) {
+    success();
+    document.getElementById("typingResult").innerText = "✅ Dobrze!";
+  } else {
+    fail();
+    document.getElementById("typingResult").innerText =
+      "❌ Poprawnie: " + currentWord.en;
+  }
+
+  setTimeout(showNextQuestion, 1200);
+}
+
+// ===============================
+// OCENIANIE
+// ===============================
+function success(button) {
+  if (button) button.classList.add("correct");
+  data.score += 10;
+  data.streak++;
+  currentWord.level = Math.min(5, currentWord.level + 1);
+  saveData();
+}
+
+function fail(button, correct) {
+  if (button) button.classList.add("wrong");
+  data.score = Math.max(0, data.score - 5);
+  data.streak = 0;
+  currentWord.level = Math.max(0, currentWord.level - 1);
+
+  if (correct) {
+    document.querySelectorAll(".answers button").forEach(b => {
+      if (b.innerText === correct) b.classList.add("correct");
     });
   }
 
   saveData();
-  setTimeout(showNextQuestion, 1200);
 }
 
 // ===============================
@@ -125,4 +208,7 @@ function resetProgress() {
 // ===============================
 // START
 // ===============================
-document.addEventListener("DOMContentLoaded", showNextQuestion);
+document.addEventListener("DOMContentLoaded", () => {
+  data = loadData();
+  showNextQuestion();
+});
