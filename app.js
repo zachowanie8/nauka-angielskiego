@@ -205,6 +205,24 @@ function resetProgress() {
   location.reload();
 }
 
+function setupLiveSwitching() {
+  // zmiana trybu (radio)
+  document.querySelectorAll('input[name="mode"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+      showNextQuestion();
+    });
+  });
+
+  // zmiana kategorii (checkboxy)
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", () => {
+      showNextQuestion();
+    });
+  });
+}
+
+
+
 // ===============================
 // START
 // ===============================
