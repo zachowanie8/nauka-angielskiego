@@ -3,41 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Nauka słówek – Quiz</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- PWA (opcjonalnie, jeśli masz) -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111827">
 </head>
 <body>
 
   <div class="app">
     <h1>🇬🇧 Nauka słówek</h1>
-    <p class="subtitle">Quiz ABCD</p>
+    <p class="subtitle">Quiz językowy</p>
+
+    <!-- TRYB QUIZU -->
+    <div class="panel">
+      <strong>Tryb:</strong><br>
+      <label>
+        <input type="radio" name="mode" value="abcd" checked>
+        ABCD (EN → PL)
+      </label><br>
+      <label>
+        <input type="radio" name="mode" value="typing">
+        Wpisywanie (PL → EN)
+      </label>
+    </div>
+
+    <!-- KATEGORIE -->
+    <div class="panel">
+      <strong>Kategorie:</strong><br>
+      <label>
+        <input type="checkbox" value="conversation" checked>
+        Rozmowa
+      </label><br>
+      <label>
+        <input type="checkbox" value="car" checked>
+        Części samochodowe
+      </label>
+    </div>
 
     <!-- PYTANIE -->
     <h2 id="question"></h2>
 
-    <!-- ODPOWIEDZI ABCD -->
+    <!-- ABCD -->
     <div class="answers"></div>
+
+    <!-- WPISYWANIE -->
+    <div class="typing hidden">
+      <input id="typingAnswer" placeholder="Wpisz po angielsku">
+      <button onclick="checkTyping()">Sprawdź</button>
+      <p id="typingResult"></p>
+    </div>
 
     <!-- STATYSTYKI -->
     <p id="stats"></p>
 
-    <!-- RESET -->
-    <button class="secondary" onclick="resetProgress()">
-      Reset postępów
-    </button>
+    <button class="secondary" onclick="resetProgress()">Reset postępów</button>
   </div>
 
-  <!-- JS -->
- 
   <script src="words.js"></script>
-<script src="app.js" defer></script>
-
+  <script src="app.js" defer></script>
 </body>
 </html>
