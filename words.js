@@ -3,6 +3,7 @@
 // ===============================
 
 const WORD_SETS = {
+
   conversation: [
   { id: "conversation_always", en: "always", pl: "zawsze" },
   { id: "conversation_often", en: "often", pl: "często" },
@@ -14,7 +15,7 @@ const WORD_SETS = {
   { id: "conversation_maybe", en: "maybe", pl: "może" },
   { id: "conversation_together", en: "together", pl: "razem" },
   { id: "conversation_alone", en: "alone", pl: "sam" },
-
+    
   { id: "conversation_early", en: "early", pl: "wcześnie" },
   { id: "conversation_late", en: "late", pl: "późno" },
   { id: "conversation_everywhere", en: "everywhere", pl: "wszędzie" },
@@ -49,7 +50,7 @@ const WORD_SETS = {
   { id: "conversation_right_now", en: "right now", pl: "teraz" },
   { id: "conversation_later", en: "later", pl: "później" },
   { id: "conversation_again", en: "again", pl: "znowu" }
-]
+],
 
 
   car: [
@@ -156,6 +157,5 @@ const WORD_SETS = {
   { id: "car_tire", en: "tire", pl: "opona" },
   { id: "car_rim", en: "rim", pl: "felga" }
 ]
-
 
 };
