@@ -157,7 +157,7 @@ function checkABCD(answer, button) {
   if (answer === currentWord.pl) {
     success(button);
   } else {
-    fail("No debil",button, currentWord.pl);
+    fail(button, currentWord.pl);
   }
 
   setTimeout(showNextQuestion, 1200);
