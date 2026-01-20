@@ -157,8 +157,26 @@ function checkABCD(answer, button) {
   if (answer === currentWord.pl) {
     success(button);
   } else {
-    fail(button, currentWord.pl);
+    function fail(button, correct) {
+  if (button) button.classList.add("wrong");
+  data.score = Math.max(0, data.score - 5);
+  data.streak = 0;
+  currentWord.level = Math.max(0, currentWord.level - 1);
+
+  if (correct) {
+    // podświetlamy przyciski, które są poprawne
+    document.querySelectorAll(".answers button").forEach(b => {
+      if (b.innerText === correct) b.classList.add("correct");
+    });
+
+    // DODAJEMY DODATKOWY KOMUNIKAT
+    const statsEl = document.getElementById("stats");
+    statsEl.innerText += " ❌ Błędna odpowiedź! Poprawnie: " + correct;
   }
+
+  saveData();
+}
+
 
   setTimeout(showNextQuestion, 1200);
 }
