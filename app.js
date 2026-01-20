@@ -157,7 +157,7 @@ function checkABCD(answer, button) {
   if (answer === currentWord.pl) {
     success(button);
   } else {
-    fail(button, currentWord.pl);
+    fail("No debil",button, currentWord.pl);
   }
 
   setTimeout(showNextQuestion, 1200);
@@ -168,9 +168,23 @@ function checkABCD(answer, button) {
 function showTyping() {
   const box = document.querySelector(".typing");
   box.classList.remove("hidden");
-  document.getElementById("typingAnswer").value = "";
+
+  const input = document.getElementById("typingAnswer");
+  input.value = "";
   document.getElementById("typingResult").innerText = "";
+
+  // Usuń stary listener, żeby nie dublować
+  input.onkeydown = null;
+
+  // Listener Enter
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault(); // nie wstawia nowej linii
+      checkTyping();
+    }
+  });
 }
+
 
 function checkTyping() {
   const input = document.getElementById("typingAnswer").value.trim().toLowerCase();
@@ -181,10 +195,10 @@ function checkTyping() {
     document.getElementById("typingResult").innerText = "✅ Dobrze!";
   } else {
     fail();
-    document.getElementById("typingResult").innerText = "❌ Poprawnie: " + currentWord.en;
+    document.getElementById("typingResult").innerText = "❌ Synek bo cie jebnę poprawnie: " + currentWord.en;
   }
 
-  setTimeout(showNextQuestion, 1200);
+  setTimeout(showNextQuestion, 2500);
 }
 
 // ===============================
