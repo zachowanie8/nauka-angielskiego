@@ -131,6 +131,8 @@ function showABCD() {
   const answers = generateAnswers(currentWord);
   const container = document.querySelector(".answers");
 
+  container.innerHTML = ""; // ważne, żeby wyczyścić stare przyciski
+
   answers.forEach(ans => {
     const btn = document.createElement("button");
     btn.innerText = ans;
@@ -152,24 +154,52 @@ function generateAnswers(word) {
 }
 
 function checkABCD(answer, button) {
+  // blokujemy wszystkie przyciski
   document.querySelectorAll(".answers button").forEach(b => (b.disabled = true));
 
   if (answer === currentWord.pl) {
+    // poprawna odpowiedź
     success(button);
   } else {
-    function fail(button, correct) {
+    // błędna odpowiedź
+    fail(button, currentWord.pl); // <- wywołujemy istniejącą funkcję fail
+  }
+
+  // wyświetlamy kolejne pytanie po 2s
+  setTimeout(() => {
+    // reset podświetleń przycisków
+    document.querySelectorAll(".answers button").forEach(b => {
+      b.classList.remove("wrong", "correct");
+      b.disabled = false;
+    });
+
+    // reset komunikatu statystyk jeśli był dodany
+    // np. jeśli w fail dodajesz "Błędna odpowiedź"
+    // możesz go wyczyścić tutaj, np:
+    const statsEl = document.getElementById("stats");
+    statsEl.innerText = statsEl.innerText.replace(/ ❌ Błędna odpowiedź! Poprawnie: .+/, "");
+
+    showNextQuestion();
+  }, 2000);
+}
+
+// ===============================
+// FUNKCJA FAIL (osobno, poza checkABCD)
+function fail(button, correct) {
   if (button) button.classList.add("wrong");
   data.score = Math.max(0, data.score - 5);
   data.streak = 0;
-  currentWord.level = Math.max(0, currentWord.level - 1);
+
+  // aktualizacja progress dla słowa
+  data.progress[currentWord.id] = Math.max(0, (data.progress[currentWord.id] || 0) - 1);
 
   if (correct) {
-    // podświetlamy przyciski, które są poprawne
+    // podświetlamy przycisk poprawnej odpowiedzi
     document.querySelectorAll(".answers button").forEach(b => {
       if (b.innerText === correct) b.classList.add("correct");
     });
 
-    // DODAJEMY DODATKOWY KOMUNIKAT
+    // dodatkowy komunikat w stats
     const statsEl = document.getElementById("stats");
     statsEl.innerText += " ❌ Błędna odpowiedź! Poprawnie: " + correct;
   }
@@ -177,9 +207,6 @@ function checkABCD(answer, button) {
   saveData();
 }
 
-
-  setTimeout(showNextQuestion, 1200);
-}
 
 // ===============================
 // TRYB WPISYWANIA (PL → EN)
